@@ -275,13 +275,12 @@ namespace DataChanger
             DataTable data = dataSet.Tables[0];
             int columnValue = data.Columns.Count;
             //清除列 Remark备注
-            for (int i = 0; i < columnValue; i++)
+            for (int i = columnValue - 1; i >= 0; i--)
             {
                 if (data.Rows[0][i].ToString().ToLower().Equals("remark"))
                 {
                     data.Columns.RemoveAt(i);
                     columnValue = data.Columns.Count;
-                    break;
                 }
             }
             //清除 行备注
