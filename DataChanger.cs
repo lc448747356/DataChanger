@@ -12,32 +12,32 @@ namespace DataChanger
 {
     class Program
     {
-        const string _update = "-update";
-        const string _configPath = "-config path";
-        const string _targetPath = "-target path";
-        const string _help = "-help";
-        const string _exit = "-exit";
+        const string _UPDATE = "-update";
+        const string _CONFIG_PATH = "-config path";
+        const string _TARGET_PATH = "-target path";
+        const string _HELP = "-help";
+        const string _EXIT = "-exit";
 
-        static PathController pathController;
-        static PathRecorder path;
-        static bool isFinished = false;
-        static bool willExit = false;
+        static PathController s_pathController;
+        static PathRecorder s_path;
+        static bool s_isFinished = false;
+        static bool s_willExit = false;
         static void Main(string[] args)
         {
             Console.Title = "ExcelChanger";
             //获得配置表和Json路径
-            pathController = new PathController();
-            path = pathController.GetXMLPath();
-            Console.WriteLine("input commond , use {0} to get more", _help);
+            s_pathController = new PathController();
+            s_path = s_pathController.GetXMLPath();
+            Console.WriteLine("input commond , use {0} to get more", _HELP);
             while (true)
             {
                 string userInput = Console.ReadLine().ToLower();
-                Commond(userInput);
-                if (isFinished)
+                CommondMethod(userInput);
+                if (s_isFinished)
                 {
                     break;
                 }
-                if (willExit)
+                if (s_willExit)
                 {
                     return;
                 }
@@ -45,65 +45,65 @@ namespace DataChanger
             Console.WriteLine("press any key to exit");
             Console.ReadKey();
         }
-        private static void Commond(string commond)
+        private static void CommondMethod(string commond)
         {
 
             switch (commond)
             {
-                case _update:
+                case _UPDATE:
                     Commond_Update();
                     break;
-                case _configPath:
+                case _CONFIG_PATH:
                     Commond_ConfigPathSet();
                     break;
-                case _targetPath:
+                case _TARGET_PATH:
                     Commond_TargetPathSet();
                     break;
-                case _help:
+                case _HELP:
                     Commond_Help();
                     break;
-                case _exit:
-                    willExit = true;
+                case _EXIT:
+                    s_willExit = true;
                     break;
                 default:
-                    Console.WriteLine("useless commond \nyou can input {0} to show more", _help);
+                    Console.WriteLine("useless commond \nyou can input {0} to show more", _HELP);
                     break;
             }
         }
         private static void Commond_Update()
         {
-            if (path == null || path.configPath == null || path.targetPath == null)
+            if (s_path == null || s_path.ConfigPath == null || s_path.TargetPath == null)
             {
                 Console.WriteLine("Please set the correct path");
                 return;
             }
             //读取Excel并进行数据处理
-            MyExcelDataTransformer excelReader = new MyExcelDataTransformer(path.configPath, path.targetPath);
+            MyExcelDataTransformer excelReader = new MyExcelDataTransformer(s_path.ConfigPath, s_path.TargetPath);
             excelReader.ExcelDataRead();
-            isFinished = true;
+            s_isFinished = true;
         }
         private static void Commond_ConfigPathSet()
         {
-            PathRecorder tempPath = pathController.SetPath(true);
+            PathRecorder tempPath = s_pathController.SetPath(true);
             if (tempPath != null)
             {
-                path = tempPath;
+                s_path = tempPath;
             }
         }
         private static void Commond_TargetPathSet()
         {
-            PathRecorder tempPath = pathController.SetPath(false);
+            PathRecorder tempPath = s_pathController.SetPath(false);
             if (tempPath != null)
             {
-                path = tempPath;
+                s_path = tempPath;
             }
         }
         private static void Commond_Help()
         {
-            Console.WriteLine("{0}\t generate target data", _update);
-            Console.WriteLine("{0}\t set config path ", _configPath);
-            Console.WriteLine("{0}\t set target path", _targetPath);
-            Console.WriteLine("{0}\t exit application", _exit);
+            Console.WriteLine("{0}\t generate target data", _UPDATE);
+            Console.WriteLine("{0}\t set config path ", _CONFIG_PATH);
+            Console.WriteLine("{0}\t set target path", _TARGET_PATH);
+            Console.WriteLine("{0}\t exit application", _EXIT);
         }
     }
     /// <summary>
@@ -111,12 +111,12 @@ namespace DataChanger
     /// </summary>
     public class PathRecorder
     {
-        public string configPath;
-        public string targetPath;
+        public string ConfigPath;
+        public string TargetPath;
     }
     public class PathController
     {
-        const string pathFileName = "pathRecorder.xml";
+        const string PATH_FILE_NAME = "pathRecorder.xml";
         string curPath = System.Environment.CurrentDirectory;
         public PathRecorder SetPath(bool isConfigPath)
         {
@@ -139,8 +139,8 @@ namespace DataChanger
                 }
             }
             DirectoryInfo di = new DirectoryInfo(curPath);
-            FileInfo[] files = di.GetFiles(pathFileName);
-            string fullPath = string.Format("{0}/{1}", curPath, pathFileName);
+            FileInfo[] files = di.GetFiles(PATH_FILE_NAME);
+            string fullPath = string.Format("{0}/{1}", curPath, PATH_FILE_NAME);
             //存在XML文件时
             if (files != null && files.Length > 0)
             {
@@ -151,11 +151,11 @@ namespace DataChanger
                 pathRecorder = xmlserializer.Deserialize(xmlFS) as PathRecorder;
                 if (isConfigPath)
                 {
-                    pathRecorder.configPath = tempPath;
+                    pathRecorder.ConfigPath = tempPath;
                 }
                 else
                 {
-                    pathRecorder.targetPath = tempPath;
+                    pathRecorder.TargetPath = tempPath;
                 }
                 xmlFS.Close();
                 xmlFS.Dispose();
@@ -167,16 +167,16 @@ namespace DataChanger
             //不存在时
             else
             {
-                FileStream fs = new FileStream(curPath + "/" + pathFileName, FileMode.Create, FileAccess.Write);
+                FileStream fs = new FileStream(curPath + "/" + PATH_FILE_NAME, FileMode.Create, FileAccess.Write);
                 XmlSerializer xmlSerialize = new XmlSerializer(typeof(PathRecorder));
                 pathRecorder = new PathRecorder();
                 if (isConfigPath)
                 {
-                    pathRecorder.configPath = tempPath;
+                    pathRecorder.ConfigPath = tempPath;
                 }
                 else
                 {
-                    pathRecorder.targetPath = tempPath;
+                    pathRecorder.TargetPath = tempPath;
                 }
                 xmlSerialize.Serialize(fs, pathRecorder);
                 fs.Close();
@@ -189,9 +189,9 @@ namespace DataChanger
         /// </summary>
         public PathRecorder GetXMLPath()
         {
-            string fullPath = string.Format("{0}/{1}", curPath, pathFileName);
+            string fullPath = string.Format("{0}/{1}", curPath, PATH_FILE_NAME);
             DirectoryInfo di = new DirectoryInfo(curPath);
-            FileInfo[] files = di.GetFiles(pathFileName);
+            FileInfo[] files = di.GetFiles(PATH_FILE_NAME);
             //存在XML文件时
             if (files != null && files.Length > 0)
             {
@@ -214,8 +214,8 @@ namespace DataChanger
                 }
                 xmlFS.Close();
                 xmlFS.Dispose();
-                Console.WriteLine(String.Format("config path: {0}", pathRecorder.configPath));
-                Console.WriteLine(String.Format("target path: {0}", pathRecorder.targetPath));
+                Console.WriteLine(String.Format("config path: {0}", pathRecorder.ConfigPath));
+                Console.WriteLine(String.Format("target path: {0}", pathRecorder.TargetPath));
                 return pathRecorder;
             }
             //不存在时

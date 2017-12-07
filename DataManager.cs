@@ -10,13 +10,13 @@ public class DataManager : Singeleton<DataManager>
   
     #region Fields	
     //Resources文件夹下的存放Data目录的名称
-    const string filePath = "Data";
+    const string FILE_PATH = "Data";
     public Dictionary<int,DataTest> _DataTest;
     #endregion
     #region Functions	
     private void LoadText()
     {
-        Object[] textObjs = Resources.LoadAll(filePath, typeof(TextAsset));
+        Object[] textObjs = Resources.LoadAll(FILE_PATH, typeof(TextAsset));
         MethodInfo normalMethod = typeof(DataManager).GetMethod("MyDataToObj",BindingFlags.Instance|BindingFlags.NonPublic);
         for (int i = 0; i < textObjs.Length; i++)
         {
